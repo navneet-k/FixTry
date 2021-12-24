@@ -398,7 +398,7 @@ EOD
 EOD
 
     print $file <<EOD;
-        int encode(char * buffer) {
+        int encode(char * buffer, int & len, int & sum) {
 
             int offset = 0;
 EOD
@@ -406,7 +406,7 @@ EOD
         for my $field (get_class_fields($key, $components)) {
             if (exists $components->{$field}) {
                 print $file <<EOD;
-            offset += _\l$field.encode(buffer + offset);
+            offset += _\l$field.encode(buffer + offset, len, sum);
 EOD
             } else {
                 my $type = $type_map->{$fields->{$field}{type}}[0];
@@ -432,6 +432,7 @@ EOD
     }
 
     print $file <<EOD;
+            len += offset;
             return offset;
         }
 EOD
@@ -575,13 +576,14 @@ EOD
     print $file <<EOD;
         char * encode(char * buffer) {
 
+            int len = 0, sum = 0;
             int offset = 0;
 EOD
 
     for my $field (get_class_fields($key, $messages)) {
         if (exists $components->{$field}) {
             print $file <<EOD;
-            offset += _\l$field.encode(buffer + offset);
+            offset += _\l$field.encode(buffer + offset, len, sum);
 EOD
         } else {
             my $type = $type_map->{$fields->{$field}{type}}[0];
